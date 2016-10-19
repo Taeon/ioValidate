@@ -1,2 +1,2 @@
-# ioValidate
-PHP data validation
+# nvalidate
+A PHP library for defining rules for validation of data.

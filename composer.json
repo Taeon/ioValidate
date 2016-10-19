@@ -1,0 +1,21 @@
+{
+    "name": "taeon/iovalidate",
+    "description": "ioValidate data validation for PHP and JavaScript",
+    "keywords": ["php", "javascript", "js", "validation"],
+    "homepage": "https://github.com/Taeon/ioValidate",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Pat Fox",
+            "homepage": "https://github.com/Taeon"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "ioValidate\\": "src/php"
+        }
+    }
+}
