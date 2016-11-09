@@ -4,6 +4,6 @@ namespace ioValidate\Validator;
 
 class Required extends \ioValidate\Validator{
 	public function GetFormAttributes(){
-		return array( 'required' => true );
+		return array_merge( array( 'required' => true ), parent::GetFormAttributes() );
 	}
 }
