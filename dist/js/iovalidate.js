@@ -159,6 +159,16 @@
 					}.bind(this)
 				);
             },
+			GetValidator:function( value, type ){
+				if( typeof this.validators[ value ] !== 'undefined' ){
+					for( var i = 0; i < this.validators[ value ].length; i++ ){
+						if( this.validators[ value ][ i ].type === type ){
+							return this.validators[ value ][ i ];
+						}
+					}
+				}
+				return null;
+			},
 			DoFormValidation:function( event ){
 				var form = new ioForm( event.target );
 				this.ClearFormErrors( form );
@@ -228,16 +238,18 @@
                 if( typeof this.validators[ name ] !== 'undefined' ){
                     for( var i = 0; i < this.validators[ name ].length; i++ ){
                         var validator_definition = this.validators[ name ][ i ];
-
-						var settings = validator_definition.settings;
-                        var validator = new window[ 'ioValidateValidator_' + validator_definition.type ]( settings );
-                        if( !validator.Validate( value, values ) ){
-                            this.AddError(
-                                name,
-                                this.GetErrorText( validator_definition.type, name )
-                            );
-                            valid = false;
-                        }
+console.log(validator_definition.enabled);
+						if( validator_definition.enabled ){
+							var settings = validator_definition.settings;
+							var validator = new window[ 'ioValidateValidator_' + validator_definition.type ]( settings );
+							if( !validator.Validate( value, values ) ){
+								this.AddError(
+									name,
+									this.GetErrorText( validator_definition.type, name )
+								);
+								valid = false;
+							}
+						}
                     }
                 }
                 return valid;
