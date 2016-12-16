@@ -10,7 +10,7 @@
     this,
     function () {
         'use strict';
-        
+
         var getAttributes = function( element ){
             var attributes = {};
 			var attribute_names = element.attributes;
@@ -21,7 +21,7 @@
 			}
             return attributes;
         };
-        
+
         /********
          * Handles form interaction
          */
@@ -35,8 +35,8 @@
 			};
             this.error_text_field = {};
             this.errors = {};
-			
-            // What sort of element/selector have we been given?    
+
+            // What sort of element/selector have we been given?
             if ( typeof definition == 'string' ) {
                 // String
                 var items = document.querySelectorAll( definition );
@@ -108,13 +108,13 @@
                                     case 'step':
                                     case 'maxlength':
                                     {
-                                        validators.push( {field:field, type:attribute, settings:attributes[ attribute ]} );
+                                        validators.push( {field:field, type:attribute, settings:attributes[ attribute ], value_type:attributes.type} );
                                         break;
                                     }
 									case 'type':{
 										var types = ['email'];
 										if( types.indexOf( attributes[ attribute ] ) !== -1 ){
-	                                        validators.push( {field:field, type:attributes[ attribute ], settings:{}} );
+	                                        validators.push( {field:field, type:attributes[ attribute ], settings:{}, value_type:attributes.type} );
 										}
 										break;
 									}
@@ -123,7 +123,7 @@
                                         // Anything with iovalidate prefix
                                         if(
                                            attribute.substr( 0, 16 ) === 'data-iovalidate-'
-                                           || 
+                                           ||
                                            attribute.substr( 0, 9 ) === 'data-iov-'
                                         ){
                                             var name = attribute.match( /^(data\-iovalidate\-|data\-iov\-)(.*)$/ )[2];
@@ -131,7 +131,7 @@
                                             if( name.substr( 0, 6 ) === 'error-' ){
                                                 errors.push( {field:field, type:name.substr( 6 ), settings:attributes[ attribute ]} );
                                             } else {
-                                                validators.push( {field:field, type:name, settings:attributes[ attribute ]} );
+                                                validators.push( {field:field, type:name, settings:attributes[ attribute ], value_type:attributes.type} );
                                             }
                                         }
                                         // Do nothing
@@ -145,13 +145,13 @@
 
                 for( var i = 0; i < validators.length; i++ ){
                     var validator = validators[i];
-                    this.AddValidator( validator.field, validator.type, validator.settings );
+                    this.AddValidator( validator.field, validator.type, validator.settings, validator.value_type );
                 }
                 for( i = 0; i < errors.length; i++ ){
                     var error = errors[i];
                     this.AddErrorText( error.field, error.type, error.settings );
                 }
-				
+
 				form.on(
 					'reset',
 					function(event){
@@ -180,9 +180,9 @@
 					this.RenderFormErrors( form, this.errors );
 					form.trigger( 'iovalidate:invalid', { errors: this.errors } );
 				}
-				
+
 			},
-            AddValidator:function( field, type, settings ){
+            AddValidator:function( field, type, settings, value_type ){
                 var field_name = field.GetName();
                 if( typeof this.validators[ field_name ] === 'undefined' ){
                     this.validators[ field_name ] = [];
@@ -191,7 +191,8 @@
                     {
                         type: type,
                         settings: settings,
-                        enabled:true
+                        enabled:true,
+                        value_type:value_type
                     }
                 );
             },
@@ -238,10 +239,10 @@
                 if( typeof this.validators[ name ] !== 'undefined' ){
                     for( var i = 0; i < this.validators[ name ].length; i++ ){
                         var validator_definition = this.validators[ name ][ i ];
-console.log(validator_definition.enabled);
 						if( validator_definition.enabled ){
 							var settings = validator_definition.settings;
 							var validator = new window[ 'ioValidateValidator_' + validator_definition.type ]( settings );
+                            validator.value_type = validator_definition.value_type;
 							if( !validator.Validate( value, values ) ){
 								this.AddError(
 									name,
@@ -266,7 +267,7 @@ console.log(validator_definition.enabled);
                 this.errors[ name ].push( error );
             },
             GetErrors:function(){
-                return this.errors;  
+                return this.errors;
             },
 			ClearFormErrors:function( form ){
 				var form_element = form.GetElement();
@@ -289,7 +290,7 @@ console.log(validator_definition.enabled);
                 for( var index in errors ){
                     if( this.errors.hasOwnProperty( index ) ){
                         var field = form_element.querySelector( '[name="' + index + '"]' );
-						
+
                         var error_html = '';
                         for( var i = 0; i < errors[ index ].length; i++ ){
                             error_html += '<li>' + errors[ index ][ i ] + '</li>';
@@ -317,6 +318,7 @@ console.log(validator_definition.enabled);
  */
 var ioValidateValidator = function( settings ){
 	this.settings = settings;
+    this.value_type = null;
 };
 ioValidateValidator.prototype = {
     Validate:function(){
@@ -376,7 +378,7 @@ ioValidateValidator_equal.prototype.Validate = function( value, values ){
 			valid = false;
 		}
 	}
-	
+
     return valid;
 };
 
@@ -392,10 +394,55 @@ ioValidateValidator_greaterequal.prototype.Validate = function( value, values ){
 			valid = false;
 		}
 	}
-	
+
     return valid;
 };
 
+var ioValidateValidator_min = function( settings ){
+    ioValidateValidator.call( this, settings );
+};
+extend( ioValidateValidator_min, ioValidateValidator );
+ioValidateValidator_min.prototype.Validate = function( value, values ){
+    var valid = true;
+
+    switch( this.value_type ){
+        case 'date':{
+            if( value === null ){
+                return true;
+            }
+            valid = value >= new Date( this.settings );
+            break;
+        }
+        default:{
+            return value >= this.settings;
+        }
+    }
+
+    return valid;
+};
+
+var ioValidateValidator_max = function( settings ){
+    ioValidateValidator.call( this, settings );
+};
+extend( ioValidateValidator_max, ioValidateValidator );
+ioValidateValidator_max.prototype.Validate = function( value, values ){
+    var valid = true;
+
+    switch( this.value_type ){
+        case 'date':{
+            if( value === null ){
+                return true;
+            }
+            valid = value <= new Date( this.settings );
+            break;
+        }
+        default:{
+            return value <= this.settings;
+        }
+    }
+
+    return valid;
+};
 
 
 if( typeof extend !== 'function' ){
@@ -409,11 +456,11 @@ if( typeof extend !== 'function' ){
 //    return !jQuery.isArray( obj ) && (obj - parseFloat( obj ) + 1) >= 0;
 //}
 
-/** 
+/**
  * jQuery 2.1.3's parseHTML (without scripts options).
  * Unlike jQuery, this returns a DocumentFragment, which is more convenient to insert into DOM.
  * MIT license.
- * 
+ *
  * If you only support Edge 13+ then try this:
     function parseHTML(html, context) {
         var t = (context || document).createElement('template');
@@ -437,7 +484,7 @@ var parseHTML = (function() {
 
             _default: [0, "", ""]
         };
-        
+
     /**
      * @param {String} elem A string containing html
      * @param {Document} context
