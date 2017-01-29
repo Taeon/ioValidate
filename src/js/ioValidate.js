@@ -444,6 +444,91 @@ ioValidateValidator_max.prototype.Validate = function( value, values ){
     return valid;
 };
 
+var ioValidateValidator_filetype = function( settings ){
+    settings = JSON.parse( settings );
+    ioValidateValidator.call( this, settings );
+};
+extend( ioValidateValidator_filetype, ioValidateValidator );
+ioValidateValidator_filetype.prototype.Validate = function( value, values ){
+    var valid = true;
+
+	if( value === null ){
+		return valid;
+	}
+
+    var types = [];
+    for( var i = 0; i < this.settings.types.length; i++ ){
+      for( var t = 0; t < this.settings.types[ i ].mimetypes.length; t++ ){
+        types.push( this.settings.types[ i ].mimetypes[ t ] );
+      }
+    }
+
+    if( typeof value == 'string' ){
+alert('Validate file type: check extension');
+    } else {
+      // Iterate over file(s)
+      for( var i = 0; i < value.length; i++ ){
+        var file = value[ i ];
+        if( types.indexOf( file.type ) === -1 ){
+          valid = false;
+		  break;
+        }
+      }
+    }
+
+    return valid;
+};
+
+var ioValidateValidator_filesize = function( settings ){
+    ioValidateValidator.call( this, settings );
+};
+extend( ioValidateValidator_filesize, ioValidateValidator );
+ioValidateValidator_filesize.prototype.Validate = function( value, values ){
+    var valid = true;
+
+	if( value === null || typeof value === 'string' ){
+		// Can't validate
+		return valid;
+	}
+
+	var matches = this.settings.match( /^(\d+)(.*)$/i );
+	if( matches ){
+		var size = +matches[1];
+		var unit = matches[2];
+		switch ( unit ) {
+			case 'KB':{
+				// Do nothing
+				size *= 1024;
+				break;
+			}
+			case 'MB':{
+				size *= Math.pow( 1024, 2 );
+				break;
+			}
+			case 'GB':{
+				size *= Math.pow( 1024, 3 );
+				break;
+			}
+			case 'TB':{
+				size *= Math.pow( 1024, 4 );
+				break;
+			}
+			default:{
+				console.log( 'Invalid file size unit [' + unit + ']'  );
+				break;
+			}
+		}
+		for( var i = 0; i < value.length; i++ ){
+          	var file = value[ i ];
+			if(size < file.size){
+				valid = false;
+				break;
+			}
+		}
+	}
+    return valid;
+};
+
 
 if( typeof extend !== 'function' ){
 	if (typeof Object.create !== 'function') {
