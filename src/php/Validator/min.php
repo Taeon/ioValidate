@@ -9,7 +9,7 @@ class min extends \ioValidate\Validator{
 	public $value_type;
 
 	public function GetFormAttributes(){
-		if( !$this->value ){
+		if( $this->value === null ){
 			throw new Exception( 'You must specify minimum value' );
 		}
 		$value = $this->value;

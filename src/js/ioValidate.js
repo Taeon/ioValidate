@@ -158,7 +158,7 @@
 						this.ClearFormErrors( new ioForm( event.target ) )
 					}.bind(this)
 				);
-            },
+			},
 			GetValidator:function( value, type ){
 				if( typeof this.validators[ value ] !== 'undefined' ){
 					for( var i = 0; i < this.validators[ value ].length; i++ ){
@@ -183,7 +183,7 @@
 
 			},
             AddValidator:function( field, type, settings, value_type ){
-                var field_name = field.GetName();
+                var field_name = field.GetFieldName();
                 if( typeof this.validators[ field_name ] === 'undefined' ){
                     this.validators[ field_name ] = [];
                 }
@@ -197,8 +197,9 @@
                 );
             },
             AddErrorText:function( field, type, message ){
-                var field_name = field.GetName();
-                if( typeof this.errors[ field_name ] === 'undefined' ){
+                var field_name = field.GetFieldName();
+
+                if( typeof this.error_text_field[ field_name ] === 'undefined' ){
                     this.error_text_field[ field_name ] = {};
                 }
                 this.error_text_field[ field_name ][ type ] = message;
@@ -289,7 +290,7 @@
 
                 for( var index in errors ){
                     if( this.errors.hasOwnProperty( index ) ){
-                        var field = form_element.querySelector( '[name="' + index + '"]' );
+            			var field = form_element.querySelector( '[name="' + form.GetField( index ).GetName() + '"]' );
 
                         var error_html = '';
                         for( var i = 0; i < errors[ index ].length; i++ ){
