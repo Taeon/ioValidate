@@ -105,14 +105,19 @@
                                     case 'required':
                                     case 'min':
                                     case 'max':
-                                    case 'step':
+//                                    case 'step':
                                     case 'maxlength':
                                     {
                                         validators.push( {field:field, type:attribute, settings:attributes[ attribute ], value_type:attributes.type} );
                                         break;
                                     }
+									case 'pattern':
+                                    {
+                                        validators.push( {field:field, type:'regex', settings:attributes[ attribute ], value_type:attributes.type} );
+                                        break;
+                                    }
 									case 'type':{
-										var types = ['email'];
+										var types = ['email','number','url'];
 										if( types.indexOf( attributes[ attribute ] ) !== -1 ){
 	                                        validators.push( {field:field, type:attributes[ attribute ], settings:{}, value_type:attributes.type} );
 										}
@@ -172,7 +177,18 @@
 			DoFormValidation:function( event ){
 				var form = new ioForm( event.target );
 				this.ClearFormErrors( form );
-				if( this.Validate( form.GetValues() ) ){
+				var values = form.GetValues();
+				for( var index in values ){
+					var field = form.GetField( index );
+					switch( field.type ){
+						case 'number':{
+							// We need the raw value, otherwise we just get 0
+							values[ index ] = field.GetValue( true );
+							break;
+						}
+					}
+				}
+				if( this.Validate( values ) ){
 					form.trigger( 'iovalidate:valid' );
 				} else {
 					event.preventDefault();
@@ -367,6 +383,34 @@ ioValidateValidator_email.prototype.Validate = function( value ){
     return valid;
 };
 
+var ioValidateValidator_number = function( settings ){
+    ioValidateValidator.call( this, settings );
+};
+extend( ioValidateValidator_number, ioValidateValidator );
+ioValidateValidator_number.prototype.Validate = function( value ){
+    var valid = true;
+	if( value.toString().length > 0 && !( (value - parseFloat( value ) + 1) >= 0) ){
+		valid = false;
+	}
+
+    return valid;
+};
+
+
+var ioValidateValidator_url = function( settings ){
+    ioValidateValidator.call( this, settings );
+};
+extend( ioValidateValidator_url, ioValidateValidator );
+ioValidateValidator_url.prototype.Validate = function( value ){
+    var valid = true;
+	// Taken from https://rodneyrehm.de/t/url-regex.html#imme_emosol
+	if( value != '' && !value.match( /(https?|ftp|torrent|image|irc):\/\/(-\.)?([^\s\/?\.#-]+\.?)+(\/[^\s]*)?$/i ) ){
+		valid = false;
+	}
+    return valid;
+};
+
+
 var ioValidateValidator_equal = function( settings ){
     ioValidateValidator.call( this, settings );
 };
@@ -401,6 +445,7 @@ ioValidateValidator_greaterequal.prototype.Validate = function( value, values ){
 
 var ioValidateValidator_min = function( settings ){
     ioValidateValidator.call( this, settings );
+	this.value = settings * 1;
 };
 extend( ioValidateValidator_min, ioValidateValidator );
 ioValidateValidator_min.prototype.Validate = function( value, values ){
@@ -415,7 +460,7 @@ ioValidateValidator_min.prototype.Validate = function( value, values ){
             break;
         }
         default:{
-            return value >= this.settings;
+            return value >= this.value;
         }
     }
 
@@ -424,6 +469,7 @@ ioValidateValidator_min.prototype.Validate = function( value, values ){
 
 var ioValidateValidator_max = function( settings ){
     ioValidateValidator.call( this, settings );
+	this.value = settings * 1;
 };
 extend( ioValidateValidator_max, ioValidateValidator );
 ioValidateValidator_max.prototype.Validate = function( value, values ){
@@ -438,9 +484,38 @@ ioValidateValidator_max.prototype.Validate = function( value, values ){
             break;
         }
         default:{
-            return value <= this.settings;
+            return value <= this.value;
         }
     }
+
+    return valid;
+};
+
+var ioValidateValidator_maxlength = function( settings ){
+    ioValidateValidator.call( this, settings );
+};
+extend( ioValidateValidator_maxlength, ioValidateValidator );
+ioValidateValidator_maxlength.prototype.Validate = function( value, values ){
+    var valid = true;
+
+	if( value.length > this.settings ){
+		valid = false;
+	}
+
+    return valid;
+};
+
+var ioValidateValidator_regex = function( settings ){
+    ioValidateValidator.call( this, settings );
+};
+extend( ioValidateValidator_regex, ioValidateValidator );
+ioValidateValidator_regex.prototype.Validate = function( value, values ){
+    var valid = true;
+
+	if( !value.match(new RegExp( this.settings ))){
+		valid = false;
+	}
+
 
     return valid;
 };
