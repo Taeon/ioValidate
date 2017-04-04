@@ -512,7 +512,7 @@ extend( ioValidateValidator_regex, ioValidateValidator );
 ioValidateValidator_regex.prototype.Validate = function( value, values ){
     var valid = true;
 
-	if( !value.match(new RegExp( this.settings ))){
+	if( new RegExp( this.settings ).test(value) ){
 		valid = false;
 	}
 
