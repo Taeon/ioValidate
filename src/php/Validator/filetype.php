@@ -52,7 +52,7 @@ class filetype extends \ioValidate\Validator{
 
 	public function GetFormAttributes(){
 		if( count( $this->valid_types ) == 0 ){
-			throw new Exception( 'You must specify at least one valid file type' );
+			throw new \Exception( 'You must specify at least one valid file type' );
 		}
 
 		$values = (object)array(
