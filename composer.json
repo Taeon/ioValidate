@@ -17,5 +17,8 @@
         "psr-4": {
             "ioValidate\\": "src/php"
         }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.7"
     }
 }

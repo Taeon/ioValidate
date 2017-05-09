@@ -13,5 +13,8 @@ class filesize extends \ioValidate\Validator{
 
 		return array_merge( array( 'data-iovalidate-filesize' => $this->max ), parent::GetFormAttributes() );
 	}
+	public function Validate( $value, \ioValidate\Values $values ){
+return true;
+	}
 
 }

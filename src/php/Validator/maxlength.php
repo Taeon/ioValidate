@@ -10,4 +10,8 @@ class maxlength extends \ioValidate\Validator{
 		}
 
 		return array_merge( array( 'maxlength' => $this->value ), parent::GetFormAttributes() );
-	}}
+	}
+	public function Validate( $value, \ioValidate\Values $values ){
+		return strlen( (string)$value ) <= $this->value;
+	}
+}

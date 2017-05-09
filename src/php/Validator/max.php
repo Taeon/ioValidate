@@ -36,4 +36,7 @@ class max extends \ioValidate\Validator{
 
 		return array_merge( array( 'max' => $value ), parent::GetFormAttributes() );
 	}
+	public function Validate( $value, \ioValidate\Values $values ){
+return true;
+	}
 }

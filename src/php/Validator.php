@@ -2,7 +2,7 @@
 
 namespace ioValidate;
 
-class Validator{
+abstract class Validator{
 	public $enabled = true;
 	protected $type;
 	public $message = false;
@@ -22,4 +22,6 @@ class Validator{
 		}
 		return $attributes;
 	}
+
+	public abstract function Validate( $value, \ioValidate\Values $values );
 }

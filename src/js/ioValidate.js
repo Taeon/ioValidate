@@ -86,7 +86,7 @@
         };
         ioValidate.prototype = {
             FromForm:function( form ){
-                if( typeof ioValidate == 'undefined' ){
+                if( typeof ioForm == 'undefined' ){
                     console.log( 'ioValidate requires ioForm' );
                     return;
                 }
@@ -416,15 +416,12 @@ var ioValidateValidator_equal = function( settings ){
 };
 extend( ioValidateValidator_equal, ioValidateValidator );
 ioValidateValidator_equal.prototype.Validate = function( value, values ){
-    var valid = true;
 
-	if( values[ this.settings ] !== '' ){
-		if( value != values[ this.settings ] ){
-			valid = false;
-		}
+	if( typeof values[ this.settings ] == 'undefined' ){
+		return false;
 	}
 
-    return valid;
+    return value == values[ this.settings ];
 };
 
 var ioValidateValidator_greaterequal = function( settings ){
@@ -496,13 +493,9 @@ var ioValidateValidator_maxlength = function( settings ){
 };
 extend( ioValidateValidator_maxlength, ioValidateValidator );
 ioValidateValidator_maxlength.prototype.Validate = function( value, values ){
-    var valid = true;
-
-	if( value.length > this.settings ){
-		valid = false;
-	}
-
-    return valid;
+	// This shouldn't be required, because the maxlength attribute
+	// ...should restrict the length of the input
+    return value.toString().length <= parseInt( this.settings );
 };
 
 var ioValidateValidator_regex = function( settings ){
@@ -512,10 +505,9 @@ extend( ioValidateValidator_regex, ioValidateValidator );
 ioValidateValidator_regex.prototype.Validate = function( value, values ){
     var valid = true;
 
-	if( new RegExp( this.settings ).test(value) ){
+	if( new RegExp( this.settings ).test( value ) ){
 		valid = false;
 	}
-
 
     return valid;
 };

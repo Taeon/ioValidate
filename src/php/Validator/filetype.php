@@ -61,5 +61,8 @@ class filetype extends \ioValidate\Validator{
 
 		return array_merge( array( 'data-iovalidate-filetype' => json_encode( $values ) ), parent::GetFormAttributes() );
 	}
+	public function Validate( $value, \ioValidate\Values $values ){
+return true;
+	}
 
 }
