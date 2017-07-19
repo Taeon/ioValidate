@@ -113,7 +113,7 @@
                                     }
 									case 'pattern':
                                     {
-                                        validators.push( {field:field, type:'regex', settings:attributes[ attribute ], value_type:attributes.type} );
+                                        validators.push( {field:field, type:'pattern', settings:attributes[ attribute ], value_type:attributes.type} );
                                         break;
                                     }
 									case 'type':{
@@ -174,29 +174,18 @@
 				}
 				return null;
 			},
-			DoFormValidation:function( event ){
-				var form = new ioForm( event.target );
+			DoFormValidation:function( form ){
+				var form = new ioForm( form );
 				this.ClearFormErrors( form );
 				var values = form.GetValues();
-				for( var index in values ){
-					var field = form.GetField( index );
-					switch( field.type ){
-						case 'number':{
-							// We need the raw value, otherwise we just get 0
-							values[ index ] = field.GetValue( true );
-							break;
-						}
-					}
-				}
 				if( this.Validate( values ) ){
 					form.trigger( 'iovalidate:valid' );
+                    return true;
 				} else {
-					event.preventDefault();
-					event.stopImmediatePropagation();
 					this.RenderFormErrors( form, this.errors );
 					form.trigger( 'iovalidate:invalid', { errors: this.errors } );
+                    return false;
 				}
-
 			},
             AddValidator:function( field, type, settings, value_type ){
                 var field_name = field.GetFieldName();
@@ -204,12 +193,14 @@
                     this.validators[ field_name ] = [];
                 }
                 this.validators[ field_name ].push(
-                    {
-                        type: type,
-                        settings: settings,
-                        enabled:true,
-                        value_type:value_type
-                    }
+                    new ioValidateDefinition(
+                        {
+                            type: type,
+                            settings: settings,
+                            enabled:true,
+                            value_type:value_type
+                        }
+                    )
                 );
             },
             AddErrorText:function( field, type, message ){
@@ -329,274 +320,6 @@
         return ioValidate;
     }
 ));
-
-/*********
- * Base class for fields
- */
-var ioValidateValidator = function( settings ){
-	this.settings = settings;
-    this.value_type = null;
-};
-ioValidateValidator.prototype = {
-    Validate:function(){
-        alert( 'Validate function not defined' );
-    }
-};
-
-var ioValidateValidator_required = function( settings ){
-    ioValidateValidator.call( this, settings );
-};
-extend( ioValidateValidator_required, ioValidateValidator );
-ioValidateValidator_required.prototype.Validate = function( value ){
-    var valid = true;
-
-    switch( typeof value ){
-        case 'boolean':{
-            valid = ( value === true );
-            break;
-        }
-        case 'string':{
-            valid = ( value !== '' );
-            break;
-        }
-        case 'object':{
-			if( Array.isArray( value ) ){
-	            valid = value.length > 0;
-			} else {
-	            valid = ( value !== null );
-			}
-            break;
-        }
-    }
-    return valid;
-};
-
-var ioValidateValidator_email = function( settings ){
-    ioValidateValidator.call( this, settings );
-};
-extend( ioValidateValidator_email, ioValidateValidator );
-ioValidateValidator_email.prototype.Validate = function( value ){
-    var valid = true;
-	if( value != '' && !value.match( /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))$/i ) ){
-		valid = false;
-	}
-    return valid;
-};
-
-var ioValidateValidator_number = function( settings ){
-    ioValidateValidator.call( this, settings );
-};
-extend( ioValidateValidator_number, ioValidateValidator );
-ioValidateValidator_number.prototype.Validate = function( value ){
-    var valid = true;
-	if( value.toString().length > 0 && !( (value - parseFloat( value ) + 1) >= 0) ){
-		valid = false;
-	}
-
-    return valid;
-};
-
-
-var ioValidateValidator_url = function( settings ){
-    ioValidateValidator.call( this, settings );
-};
-extend( ioValidateValidator_url, ioValidateValidator );
-ioValidateValidator_url.prototype.Validate = function( value ){
-    var valid = true;
-	// Taken from https://rodneyrehm.de/t/url-regex.html#imme_emosol
-	if( value != '' && !value.match( /(https?|ftp|torrent|image|irc):\/\/(-\.)?([^\s\/?\.#-]+\.?)+(\/[^\s]*)?$/i ) ){
-		valid = false;
-	}
-    return valid;
-};
-
-
-var ioValidateValidator_equal = function( settings ){
-    ioValidateValidator.call( this, settings );
-};
-extend( ioValidateValidator_equal, ioValidateValidator );
-ioValidateValidator_equal.prototype.Validate = function( value, values ){
-
-	if( typeof values[ this.settings ] == 'undefined' ){
-		return false;
-	}
-
-    return value == values[ this.settings ];
-};
-
-var ioValidateValidator_greaterequal = function( settings ){
-    ioValidateValidator.call( this, settings );
-};
-extend( ioValidateValidator_greaterequal, ioValidateValidator );
-ioValidateValidator_greaterequal.prototype.Validate = function( value, values ){
-    var valid = true;
-
-	if( value !== null && values[ this.settings ] !== null ){
-		if( value < values[ this.settings ] ){
-			valid = false;
-		}
-	}
-
-    return valid;
-};
-
-var ioValidateValidator_min = function( settings ){
-    ioValidateValidator.call( this, settings );
-	this.value = settings * 1;
-};
-extend( ioValidateValidator_min, ioValidateValidator );
-ioValidateValidator_min.prototype.Validate = function( value, values ){
-    var valid = true;
-
-    switch( this.value_type ){
-        case 'date':{
-            if( value === null ){
-                return true;
-            }
-            valid = value >= new Date( this.settings );
-            break;
-        }
-        default:{
-            return value >= this.value;
-        }
-    }
-
-    return valid;
-};
-
-var ioValidateValidator_max = function( settings ){
-    ioValidateValidator.call( this, settings );
-	this.value = settings * 1;
-};
-extend( ioValidateValidator_max, ioValidateValidator );
-ioValidateValidator_max.prototype.Validate = function( value, values ){
-    var valid = true;
-
-    switch( this.value_type ){
-        case 'date':{
-            if( value === null ){
-                return true;
-            }
-            valid = value <= new Date( this.settings );
-            break;
-        }
-        default:{
-            return value <= this.value;
-        }
-    }
-
-    return valid;
-};
-
-var ioValidateValidator_maxlength = function( settings ){
-    ioValidateValidator.call( this, settings );
-};
-extend( ioValidateValidator_maxlength, ioValidateValidator );
-ioValidateValidator_maxlength.prototype.Validate = function( value, values ){
-	// This shouldn't be required, because the maxlength attribute
-	// ...should restrict the length of the input
-    return value.toString().length <= parseInt( this.settings );
-};
-
-var ioValidateValidator_regex = function( settings ){
-    ioValidateValidator.call( this, settings );
-};
-extend( ioValidateValidator_regex, ioValidateValidator );
-ioValidateValidator_regex.prototype.Validate = function( value, values ){
-    var valid = true;
-
-	if( new RegExp( this.settings ).test( value ) ){
-		valid = false;
-	}
-
-    return valid;
-};
-
-var ioValidateValidator_filetype = function( settings ){
-    settings = JSON.parse( settings );
-    ioValidateValidator.call( this, settings );
-};
-extend( ioValidateValidator_filetype, ioValidateValidator );
-ioValidateValidator_filetype.prototype.Validate = function( value, values ){
-    var valid = true;
-
-	if( value === null ){
-		return valid;
-	}
-
-    var types = [];
-    for( var i = 0; i < this.settings.types.length; i++ ){
-      for( var t = 0; t < this.settings.types[ i ].mimetypes.length; t++ ){
-        types.push( this.settings.types[ i ].mimetypes[ t ] );
-      }
-    }
-
-    if( typeof value == 'string' ){
-alert('Validate file type: check extension');
-    } else {
-      // Iterate over file(s)
-      for( var i = 0; i < value.length; i++ ){
-        var file = value[ i ];
-        if( types.indexOf( file.type ) === -1 ){
-          valid = false;
-		  break;
-        }
-      }
-    }
-
-    return valid;
-};
-
-var ioValidateValidator_filesize = function( settings ){
-    ioValidateValidator.call( this, settings );
-};
-extend( ioValidateValidator_filesize, ioValidateValidator );
-ioValidateValidator_filesize.prototype.Validate = function( value, values ){
-    var valid = true;
-
-	if( value === null || typeof value === 'string' ){
-		// Can't validate
-		return valid;
-	}
-
-	var matches = this.settings.match( /^(\d+)(.*)$/i );
-	if( matches ){
-		var size = +matches[1];
-		var unit = matches[2];
-		switch ( unit ) {
-			case 'KB':{
-				// Do nothing
-				size *= 1024;
-				break;
-			}
-			case 'MB':{
-				size *= Math.pow( 1024, 2 );
-				break;
-			}
-			case 'GB':{
-				size *= Math.pow( 1024, 3 );
-				break;
-			}
-			case 'TB':{
-				size *= Math.pow( 1024, 4 );
-				break;
-			}
-			default:{
-				console.log( 'Invalid file size unit [' + unit + ']'  );
-				break;
-			}
-		}
-		for( var i = 0; i < value.length; i++ ){
-          	var file = value[ i ];
-			if(size < file.size){
-				valid = false;
-				break;
-			}
-		}
-	}
-    return valid;
-};
-
 
 if( typeof extend !== 'function' ){
 	if (typeof Object.create !== 'function') {

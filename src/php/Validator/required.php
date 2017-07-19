@@ -7,6 +7,6 @@ class required extends \ioValidate\Validator{
 		return array_merge( array( 'required' => true ), parent::GetFormAttributes() );
 	}
 	public function Validate( $value, \ioValidate\Values $values ){
-return true;
+		return $value !== '';
 	}
 }

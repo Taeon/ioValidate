@@ -4,6 +4,7 @@ namespace ioValidate;
 
 class Values implements \Iterator, \Countable{
 	protected $values;
+	public $errors = array();
 
 	public function FromArray( $array ){
 		foreach( $array as $name => $value ){
@@ -26,6 +27,13 @@ class Values implements \Iterator, \Countable{
 
 	public function HasValue( $name ){
 		return isset( $this->values[ $name ] );
+	}
+
+	public function AddError( $field_name, $message ){
+		if( !array_key_exists( $field_name, $this->errors ) ){
+			$this->errors[ $field_name ] = array();
+		}
+		$this->errors[ $field_name ][] = $message;
 	}
 
 	public function rewind() {

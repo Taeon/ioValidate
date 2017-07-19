@@ -9,8 +9,9 @@ module.exports = function(grunt) {
                 src: [
 //                    'src/js/utils.js',
                     'src/js/ioValidate.js',
-//                    'src/js/Field.js',
-//                    'src/js/Fields/*.js'
+                    'src/js/validator.js',
+                    'src/js/definition.js',
+                    'src/js/Validators/*.js'
                 ],
                 dest: 'dist/js/iovalidate.js'
             },
@@ -37,12 +38,12 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-copy');
-    
+
     grunt.registerTask(
         'default',
         [
             'concat:js',
-            'uglify'
+        //    'uglify'
         ]
     );
 
