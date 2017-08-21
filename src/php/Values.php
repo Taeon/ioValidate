@@ -2,8 +2,8 @@
 
 namespace ioValidate;
 
-class Values implements \Iterator, \Countable{
-	protected $values;
+class Values implements \Iterator, \Countable, \JsonSerializable{
+	public $values;
 	public $errors = array();
 
 	public function FromArray( $array ){
@@ -23,6 +23,9 @@ class Values implements \Iterator, \Countable{
 			return $this->values[ $name ];
 		}
 		return null;
+	}
+	public function GetValues(){
+		return (object)$this->values;
 	}
 
 	public function HasValue( $name ){
@@ -62,5 +65,16 @@ class Values implements \Iterator, \Countable{
 	public function count(){
 		return count( $this->values );
 	}
-
+	public function __get( $key ){
+		if( $this->HasValue( $key ) ){
+			return $this->values[ $key ];
+		}
+		return null;
+	}
+	public function __isset( $key ){
+		return $this->HasValue( $key );
+	}
+	public function jsonSerialize() {
+        return (object)$this->values;
+    }
 }

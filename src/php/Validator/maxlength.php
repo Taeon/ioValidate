@@ -6,7 +6,7 @@ class maxlength extends \ioValidate\Validator{
 	protected $value;
 	public function GetFormAttributes(){
 		if( !$this->value ){
-			throw new Exception( 'You must specify maximum length' );
+			throw new \Exception( 'You must specify maximum length (i.e. value)' );
 		}
 
 		return array_merge( array( 'maxlength' => $this->value ), parent::GetFormAttributes() );
