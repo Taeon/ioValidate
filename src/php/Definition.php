@@ -7,6 +7,25 @@ class Definition {
 	public function GetValidators(){
 		return $this->fields;
 	}
+
+	/**
+	 * Create a definition from an array
+	 *
+	 * @param 		\ioForm\Form		$form
+	 */
+	public function FromArray( $fields ){
+		foreach( $fields as $field_name => $validators ){
+			foreach( $validators as $validator_definition ){
+				$validator_type = '\\ioValidate\\Validator\\' . $validator_definition[ 'type' ];
+				$validator = new $validator_type( (object)$validator_definition );
+				$this->fields[ $field_name ][] = $validator;
+			}
+		}
+
+		// For method chaining
+		return $this;
+	}
+	
 	/**
 	 * Create a definition from an ioForm form definition
 	 *
