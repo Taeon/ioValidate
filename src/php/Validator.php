@@ -23,5 +23,9 @@ abstract class Validator{
 		return $attributes;
 	}
 
+	public function GetType(){
+		return $this->type;
+	}
+
 	public abstract function Validate( $value, \ioValidate\Values $values );
 }

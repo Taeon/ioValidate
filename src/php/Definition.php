@@ -35,6 +35,14 @@ class Definition {
 		foreach( $form->GetFields() as $field ){
 			if( count( $field->validators ) ){
 				$this->fields[ $field->name ] = $field->validators;
+				$fields_validator_types = array();
+				foreach ( $this->fields[ $field->name ] as $validator ) {
+					$fields_validator_types[] = $validator->GetType();
+				}
+				// It's an email field, so make sure it's a valid email address
+				if( $field->type == 'email' && !in_array( 'email', $fields_validator_types ) ){
+					$this->fields[ $field->name ][] = ( new Validator\email( array() ) );
+				}
 			}
 		}
 
