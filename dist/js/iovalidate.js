@@ -192,6 +192,9 @@
                 if( typeof this.validators[ field_name ] === 'undefined' ){
                     this.validators[ field_name ] = [];
                 }
+                if( typeof settings.message != 'undefined' ){
+                    this.AddErrorText( field, type, settings.message );
+                }
                 this.validators[ field_name ].push(
                     new ioValidateDefinition(
                         {
