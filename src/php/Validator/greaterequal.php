@@ -14,6 +14,10 @@ class greaterequal extends \ioValidate\Validator{
 		if( !$values->HasValue( $this->value ) ){
 			return false;
 		}
+		// Ignore if no value
+		if( !$value ){
+			return true;
+		}
 		return $value >= $values->GetValue( $this->value );
 	}
 }
