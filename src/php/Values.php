@@ -74,6 +74,10 @@ class Values implements \Iterator, \Countable, \JsonSerializable{
 	public function __isset( $key ){
 		return $this->HasValue( $key );
 	}
+	public function __unset( $key ){
+		unset( $this->values[ $key ] );
+	}
+
 	public function jsonSerialize() {
         return (object)$this->values;
     }
