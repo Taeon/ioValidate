@@ -591,6 +591,11 @@ ioValidateValidator_max.prototype.Validate = function( value, values ){
          break;
      }
      default:{
+         // Don't validate string values (i.e. empty strings, which is what you get if it's not a number)
+         if( typeof value != 'number' ){
+             return true;
+         }
+
          return value <= this.value;
      }
  }
@@ -631,6 +636,10 @@ ioValidateValidator_min.prototype.Validate = function( value, values ){
          break;
      }
      default:{
+         // Don't validate string values (i.e. empty strings, which is what you get if it's not a number)
+         if( typeof value != 'number' ){
+             return true;
+         }
          return value >= this.value;
      }
  }
