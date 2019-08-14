@@ -8,7 +8,7 @@ extend( ioValidateValidator_lessequal, ioValidateValidator );
 ioValidateValidator_lessequal.prototype.Validate = function( value, values ){
  var valid = true;
 
-	if( value !== null && values[ this.settings ] !== null ){
+	if( value !== null && value !== '' && values[ this.settings ] !== null ){
 		if( value > values[ this.settings ] ){
 			valid = false;
 		}
