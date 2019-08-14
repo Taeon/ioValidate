@@ -562,7 +562,7 @@ extend( ioValidateValidator_greaterequal, ioValidateValidator );
 ioValidateValidator_greaterequal.prototype.Validate = function( value, values ){
  var valid = true;
 
-	if( value !== null && values[ this.settings ] !== null ){
+	if( value !== null && value !== '' && values[ this.settings ] !== null ){
 		if( value < values[ this.settings ] ){
 			valid = false;
 		}
