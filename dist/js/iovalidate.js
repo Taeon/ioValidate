@@ -13,12 +13,21 @@
 
         var getAttributes = function( element ){
             var attributes = {};
-			var attribute_names = element.attributes;
-			if( typeof attribute_names != 'undefined' ){
-				for (var i = 0; i < attribute_names.length; i++){
-					attributes[ attribute_names[i].nodeName ] = element.getAttribute( attribute_names[i].nodeName );
-				}
-			}
+            if( Array.isArray( element ) ){
+                for( i = 0; i < element.length; i++ ){
+                    var foo = getAttributes( element[ i ] );
+                    for( var index in foo ){
+                        attributes[ index ] = foo[ index ];
+                    }
+                }
+            } else {
+                var attribute_names = element.attributes;
+                if( typeof attribute_names != 'undefined' ){
+                    for (var i = 0; i < attribute_names.length; i++){
+                        attributes[ attribute_names[i].nodeName ] = element.getAttribute( attribute_names[i].nodeName );
+                    }
+                }    
+            }
             return attributes;
         };
 
