@@ -490,8 +490,11 @@ ioValidateValidator_filesize.prototype.Validate = function( value, values ){
 		var size = +matches[1];
 		var unit = matches[2];
 		switch ( unit ) {
-			case 'KB':{
+			case 'B':{
 				// Do nothing
+				break;
+			}
+			case 'KB':{
 				size *= 1024;
 				break;
 			}
