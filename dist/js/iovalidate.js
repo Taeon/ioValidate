@@ -296,6 +296,7 @@
 					errors[ i ].parentNode.removeChild( errors[ i ] );
 				}
 				form.trigger( 'iovalidate:clearformerrors' );
+                this.errors={};
 			},
 			SetErrorRenderFunction:function( func ){
 				this.error_render_function = func;
