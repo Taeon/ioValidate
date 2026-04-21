@@ -40,7 +40,7 @@ class filetype extends \ioValidate\Validator{
 	);
 
 	public function __construct( $definition ){
-		parent::__construct( $definition );
+        parent::__construct( $definition );
 		if( isset( $definition->valid_types_group ) ){
 			if( isset( $this->valid_types_groups[ $definition->valid_types_group ] ) ){
 				$this->valid_types = $this->valid_types_groups[ $definition->valid_types_group ];
@@ -61,8 +61,21 @@ class filetype extends \ioValidate\Validator{
 
 		return array_merge( array( 'data-iovalidate-filetype' => json_encode( $values ) ), parent::GetFormAttributes() );
 	}
-	public function Validate( $value, \ioValidate\Values $values ){
-return true;
-	}
+
+    public function Validate( $value, \ioValidate\Values $values ){
+        if( !($value && is_array($value)) ){
+            return true;
+        }
+
+        foreach( $this->valid_types as $type ){
+            foreach( $type['mimetypes'] as $mimetype ){
+                if( $mimetype == $value['type'] ){
+                    return true;
+                }
+            }
+        }
+
+        return false;        
+    }
 
 }
